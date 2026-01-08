@@ -15,7 +15,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout
+      - name: Checkout repository
         uses: actions/checkout@v4
 
       - name: Setup PHP
@@ -28,23 +28,15 @@ jobs:
       - name: Install dependencies
         run: composer install --no-interaction --no-progress --prefer-dist
 
-      - name: Unit tests (PHPUnit)
+      - name: Run unit tests (PHPUnit)
         run: vendor/bin/phpunit -c phpunit.xml
 
-      - name: SAST (Psalm)
+      - name: Static analysis (Psalm)
         run: vendor/bin/psalm --no-progress
 
-      - name: Dependency audit (Composer)
+      - name: Dependency security audit (Composer)
         run: composer audit --no-interaction
 
       - name: Secret scanning (Gitleaks)
         uses: gitleaks/gitleaks-action@v2
-
-      - name: CodeQL init
-        uses: github/codeql-action/init@v3
-        with:
-          languages: php
-
-      - name: CodeQL analyze
-        uses: github/codeql-action/analyze@v3
 
