@@ -1,0 +1,50 @@
+name: CI
+
+on:
+  push:
+    branches: ["main", "master", "develop"]
+  pull_request:
+    branches: ["main", "master", "develop"]
+
+permissions:
+  contents: read
+  security-events: write
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.3"
+          tools: composer:v2
+          extensions: mbstring, pdo, pdo_mysql
+
+      - name: Install dependencies
+        run: composer install --no-interaction --no-progress --prefer-dist
+
+      - name: Unit tests (PHPUnit)
+        run: vendor/bin/phpunit -c phpunit.xml
+
+      - name: SAST (Psalm)
+        run: vendor/bin/psalm --no-progress
+
+      - name: Dependency audit (Composer)
+        run: composer audit --no-interaction
+
+      - name: Secret scanning (Gitleaks)
+        uses: gitleaks/gitleaks-action@v2
+
+      - name: CodeQL init
+        uses: github/codeql-action/init@v3
+        with:
+          languages: php
+
+      - name: CodeQL analyze
+        uses: github/codeql-action/analyze@v3
+

@@ -1,0 +1,18 @@
+{
+    "name": "lsbetto/site-notes",
+    "autoload": {
+        "psr-4": {
+            "Lsbetto\\SiteNotes\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "loncebetto",
+            "email": "sergie.king@outlook.fr"
+        }
+    ],
+    "require-dev": {
+        "phpunit/phpunit": "^12.5",
+        "vimeo/psalm": "^6.14"
+    }
+}
