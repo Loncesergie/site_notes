@@ -15,35 +15,33 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      
-name: Checkout repository
-      uses: actions/checkout@v4
-      with:
-        fetch-depth: 0
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-      
-name: Setup PHP
-      uses: shivammathur/setup-php@v2
-      with:
-        php-version: '8.4'
-        extensions: mbstring, pdo, pdo_mysql
-        tools: composer
-        coverage: none
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: mbstring, pdo, pdo_mysql
+          tools: composer
+          coverage: none
 
-      
-name: Install dependencies
-      run: composer install --no-interaction --no-progress --prefer-dist
+      - name: Install dependencies
+        run: composer install --no-interaction --no-progress --prefer-dist
 
-      
-name: Run PHPUnit tests
-      run: vendor/bin/phpunit -c phpunit.xml
+      - name: Run PHPUnit tests
+        run: vendor/bin/phpunit -c phpunit.xml
 
-      
-name: Run Psalm static analysis
-      run: vendor/bin/psalm --no-progress
+      - name: Run Psalm static analysis
+        run: vendor/bin/psalm --no-progress
 
-      
-name: Run Gitleaks
-      uses: gitleaks/gitleaks-action@v2
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}# Optionnels (si besoin) :# GITLEAKS_CONFIG: .gitleaks.toml# GITLEAKS_ENABLE_COMMENTS: "false"# GITLEAKS_ENABLE_UPLOAD_ARTIFACT: "true"
+      - name: Run Gitleaks
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # Optionnels :
+          # GITLEAKS_CONFIG: .gitleaks.toml
+          # GITLEAKS_ENABLE_COMMENTS: "false"
+          # GITLEAKS_ENABLE_UPLOAD_ARTIFACT: "true"
