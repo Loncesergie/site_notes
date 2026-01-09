@@ -15,11 +15,11 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # Récupération du code
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-      # Configuration PHP
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
@@ -28,20 +28,18 @@ jobs:
           tools: composer
           coverage: none
 
-      # Installation des dépendances Composer
       - name: Install dependencies
         run: composer install --no-interaction --no-progress --prefer-dist
 
-      # Tests unitaires PHPUnit
       - name: Run PHPUnit tests
         run: vendor/bin/phpunit -c phpunit.xml
 
-      # Analyse statique avec Psalm
       - name: Run Psalm static analysis
         run: vendor/bin/psalm --no-progress
 
-      # Scan des secrets avec Gitleaks
       - name: Run Gitleaks
         uses: gitleaks/gitleaks-action@v2
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          args: >
+            detect --redact -v
+            --report-format=sarif --report-path=results.sarif
