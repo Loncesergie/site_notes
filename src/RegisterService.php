@@ -1,5 +1,7 @@
 <?php
-
+/**
+ * @psalm-suppress UnusedClass
+ */
 final class RegisterService
 {
     public function validate(string $username, string $email, string $password, string $confirm): array
@@ -35,20 +37,27 @@ final class RegisterService
         $username = trim($username);
         $email = trim($email);
 
-        // Unicité username/email
-        $check = $pdo->prepare("SELECT 1 FROM users WHERE UserName = :u OR Email = :e LIMIT 1");
+        $check = $pdo->prepare(
+            "SELECT 1 FROM users WHERE UserName = :u OR Email = :e LIMIT 1"
+        );
         $check->execute([':u' => $username, ':e' => $email]);
+
         if ($check->fetchColumn()) {
             throw new RuntimeException('duplicate');
         }
 
         $hash = password_hash($password, PASSWORD_DEFAULT);
-        if ($hash === false) {
-            throw new RuntimeException('hash_failed');
-        }
 
-        $ins = $pdo->prepare("INSERT INTO users (UserName, Email, Password, is_admin) VALUES (:u,:e,:p,0)");
-        $ins->execute([':u' => $username, ':e' => $email, ':p' => $hash]);
+        $insert = $pdo->prepare(
+            "INSERT INTO users (UserName, Email, Password, is_admin)
+             VALUES (:u, :e, :p, 0)"
+        );
+
+        $insert->execute([
+            ':u' => $username,
+            ':e' => $email,
+            ':p' => $hash
+        ]);
 
         return (int)$pdo->lastInsertId();
     }
