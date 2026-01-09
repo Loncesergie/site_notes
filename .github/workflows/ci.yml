@@ -9,8 +9,8 @@ on:
 permissions:
   contents: read
   security-events: write
-  issues: write         # si vous voulez que ZAP ouvre/maj une issue
-  pull-requests: read   # utile sur PR
+  issues: write
+  pull-requests: read
 
 jobs:
   ci:
@@ -42,12 +42,10 @@ jobs:
       - name: Secret scanning (Gitleaks)
         uses: gitleaks/gitleaks-action@v2
 
-      # --- OWASP ZAP (DAST) : il faut une URL accessible ---
-      # Option A : votre app tourne en local dans le runner via le serveur PHP
+      # Démarrage de l’application pour le scan DAST
       - name: Start app (local)
         run: |
-          # Adaptez "-t public" si votre docroot n'est pas "public"
-          php -S 127.0.0.1:8000 -t public > /tmp/php-server.log 2>&1 &
+          php -S 127.0.0.1:8000 -t . > /tmp/php-server.log 2>&1 &
           sleep 2
           curl -I http://127.0.0.1:8000 || (echo "App not reachable" && cat /tmp/php-server.log && exit 1)
 
@@ -55,7 +53,7 @@ jobs:
         uses: zaproxy/action-baseline@v0.15.0
         with:
           target: "http://127.0.0.1:8000"
-          rules_file_name: ".zap/rules.tsv"   # optionnel (voir plus bas)
+          rules_file_name: ".zap/rules.tsv"
           cmd_options: "-a -J zap.json -w zap.md"
           allow_issue_writing: true
 
