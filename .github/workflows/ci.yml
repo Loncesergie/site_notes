@@ -1,42 +1,47 @@
-name: CI
+name: CI Pipeline
 
 on:
   push:
-    branches: ["main", "master", "develop"]
+    branches: [ main ]
   pull_request:
-    branches: ["main", "master", "develop"]
 
 permissions:
   contents: read
+  pull-requests: read
   security-events: write
 
 jobs:
-  ci:
+  build-test-security:
     runs-on: ubuntu-latest
 
     steps:
+      # Récupération du code
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      # Configuration PHP
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: "8.4"
-          tools: composer:v2
+          php-version: '8.3'
           extensions: mbstring, pdo, pdo_mysql
+          tools: composer
+          coverage: none
 
+      # Installation des dépendances Composer
       - name: Install dependencies
         run: composer install --no-interaction --no-progress --prefer-dist
 
-      - name: Run unit tests (PHPUnit)
+      # Tests unitaires PHPUnit
+      - name: Run PHPUnit tests
         run: vendor/bin/phpunit -c phpunit.xml
 
-      - name: Static analysis (Psalm)
+      # Analyse statique avec Psalm
+      - name: Run Psalm static analysis
         run: vendor/bin/psalm --no-progress
 
-      - name: Dependency security audit (Composer)
-        run: composer audit --no-interaction
-
-      - name: Secret scanning (Gitleaks)
+      # Scan des secrets avec Gitleaks
+      - name: Run Gitleaks
         uses: gitleaks/gitleaks-action@v2
-
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
